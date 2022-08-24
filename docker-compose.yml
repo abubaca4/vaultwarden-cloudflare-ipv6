@@ -1,0 +1,94 @@
+version: '3.4'
+
+services:
+    vaultwarden:
+        image: vaultwarden/server:alpine
+        restart: always
+        environment:
+            WEBSOCKET_ENABLED: 'TRUE'
+        #    ADMIN_TOKEN: 'some_random_token_as_per_above_explanation'
+            ROCKET_ADDRESS: '::'
+            WEBSOCKET_ADDRESS: '::'
+        labels:
+            - com.centurylinklabs.watchtower.enable=true
+        volumes:
+            - vaultwarden-data:/data/
+            - /etc/localtime:/etc/localtime:ro
+        networks:
+            default:
+                ipv6_address: fd00:1:2::10
+
+    vaultwarden-backup:
+        image: ttionya/vaultwarden-backup:latest
+        restart: always
+        environment:
+           RCLONE_REMOTE_NAME: 'BitwardenBackup'
+        #   RCLONE_REMOTE_DIR: '/BitwardenBackup/'
+        #   CRON: '5 * * * *'
+        #   ZIP_ENABLE: 'TRUE'
+        #   ZIP_PASSWORD: 'WHEREISMYPASSWORD?'
+        #   ZIP_TYPE: 'zip'
+        #   BACKUP_FILE_DATE_SUFFIX: ''
+           BACKUP_KEEP_DAYS: 30
+        #   PING_URL: ''
+        #   MAIL_SMTP_ENABLE: 'FALSE'
+        #   MAIL_SMTP_VARIABLES: ''
+        #   MAIL_TO: ''
+        #   MAIL_WHEN_SUCCESS: 'TRUE'
+        #   MAIL_WHEN_FAILURE: 'TRUE'
+           TIMEZONE: 'Europe/Moscow'
+        depends_on:
+            - vaultwarden
+        labels:
+            - com.centurylinklabs.watchtower.enable=true
+        volumes:
+            - vaultwarden-data:/bitwarden/data/
+            - vaultwarden-rclone-data:/config/
+
+    nginx:
+        image: nginx:alpine
+        restart: always
+        logging:
+            driver: json-file
+            options:
+                max-size: "10m"
+                max-file: "5"
+        volumes:
+            - ./nginx_ssl:/etc/ssl
+            - ./vaultwarden.conf:/etc/nginx/nginx.conf:ro
+        labels:
+            - com.centurylinklabs.watchtower.enable=true
+        ports:
+            - "[::]:443:443"
+        depends_on:
+            - vaultwarden
+        environment:
+            TZ: 'Europe/Moscow'
+            LETSENCRYPT: 'true'
+            LE_EMAIL: 'name@example.com'
+            LE_FQDN: 'www.example.com'
+
+    watchtower:
+        image: containrrr/watchtower
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - /etc/localtime:/etc/localtime:ro
+        command: --interval 3600 --label-enable
+
+volumes:
+    vaultwarden-data:
+        name: vaultwarden-data
+    vaultwarden-rclone-data:
+        external: true
+        name: vaultwarden-rclone-data
+    nginx-ssl:
+        
+networks:
+  default:
+    driver: bridge
+    enable_ipv6: true
+    ipam:
+      driver: default
+      config:
+        # must be a ULA range
+        - subnet: fd00:1:2::/48
