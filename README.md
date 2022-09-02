@@ -1,20 +1,22 @@
-Most part of this is old and will be changed in future
+Work with readme in progress.
 
-# vaultwarden-backup-nginx-le
+This image for situation when you has only ipv6 address on your vps and your want to has access from ipv4. In cloudflare reverse proxy you receive ipv4&ipv6 address even you have only one address.
 
-This is docker-compose that run [vaultwarden](https://github.com/dani-garcia/vaultwarden) with [nginx-le](https://github.com/nginx-le/nginx-le) reverse proxy and backups by [vaultwarden-backup](https://github.com/ttionya/vaultwarden-backup/).
+# vaultwarden-cloudflare-ipv6
 
-Also [watchtower](https://github.com/containrrr/watchtower) used to auto upgrade images.
-
-It has two version: with ipv6 support and without it. The main difference is ipv6 version can log client ipv6 addresses but requaired some additional actions to setup.
+This is docker-compose that run [vaultwarden](https://github.com/dani-garcia/vaultwarden) with [nginx](https://github.com/nginxinc/docker-nginx) reverse proxy and backups by [vaultwarden-backup](https://github.com/ttionya/vaultwarden-backup/).
 
 Steps of runing:
 
+### 0 step system prepare
+
+You should set docker mirror with ipv6 support. [Issue about ipv6 support in docker](https://github.com/docker/roadmap/issues/89#issuecomment-817263625). You can use google mirror https://mirror.gcr.io or docker ipv6-only mirror registry.ipv6.docker.com
+
+Мery desirable to set [nat64](https://nat64.xyz/) o somefing can be broken. You shoud set selected dns as single proxy in the system(look [arch wiki](https://wiki.archlinux.org/title/systemd-resolved) for systemd.)
+
 ### 1 step
 
-Only when used ipv6 version.
-
-You need to run [ipv6nat](https://github.com/robbertkl/docker-ipv6nat)
+You need to run [ipv6nat](https://github.com/robbertkl/docker-ipv6nat) (it is simplest way to give network access for docker containers.
 
 ```
 docker run -d --name ipv6nat --privileged --network host --restart unless-stopped -v /var/run/docker.sock:/var/run/docker.sock:ro -v /lib/modules:/lib/modules:ro robbertkl/ipv6nat
@@ -33,11 +35,6 @@ Change docker-compose.yml with your own settings.
 You remote name(you can also change other env settings of vaultwarden-backup as you like):
 ```
 RCLONE_REMOTE_NAME: 'BitwardenBackup'
-```
-You email and domain(recomended to use real email, Let’s Encrypt will send you warning if something will goes wrong and Certificate not updated automatic.)
-```
-LE_EMAIL: 'name@example.com'
-LE_FQDN: 'www.example.com'
 ```
 
 ## Restore backup in new system
