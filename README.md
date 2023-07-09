@@ -12,7 +12,7 @@ Steps of runing:
 
 You should set docker mirror with ipv6 support. [Issue about ipv6 support in docker](https://github.com/docker/roadmap/issues/89#issuecomment-817263625). You can use google mirror https://mirror.gcr.io or docker ipv6-only mirror registry.ipv6.docker.com
 
-Мery desirable to set [nat64](https://nat64.xyz/) o somefing can be broken. You shoud set selected dns as single proxy in the system(look [arch wiki](https://wiki.archlinux.org/title/systemd-resolved) for systemd.)
+Very desirable to set [nat64](https://nat64.xyz/) o somefing can be broken. You shoud set selected dns as single proxy in the system(look [arch wiki](https://wiki.archlinux.org/title/systemd-resolved) for systemd.)
 
 ### 1 step
 
@@ -35,6 +35,12 @@ Change docker-compose.yml with your own settings.
 You remote name(you can also change other env settings of vaultwarden-backup as you like):
 ```
 RCLONE_REMOTE_NAME: 'BitwardenBackup'
+```
+If you want get push in mobile app add id and key from bitwarden site. Otherwise comment this lines
+```
+PUSH_ENABLED: true
+PUSH_INSTALLATION_ID: 'CHANGEME'
+PUSH_INSTALLATION_KEY: 'CHANGEME'
 ```
 
 ## Restore backup in new system

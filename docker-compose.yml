@@ -5,10 +5,11 @@ services:
         image: vaultwarden/server:alpine
         restart: always
         environment:
-            WEBSOCKET_ENABLED: 'TRUE'
         #    ADMIN_TOKEN: 'some_random_token_as_per_above_explanation'
             ROCKET_ADDRESS: '::'
-            WEBSOCKET_ADDRESS: '::'
+            PUSH_ENABLED: 'true'
+            PUSH_INSTALLATION_ID: 'CHANGEME' # https://bitwarden.com/host
+            PUSH_INSTALLATION_KEY: 'CHANGEME'
         labels:
             - com.centurylinklabs.watchtower.enable=true
         volumes:
@@ -64,9 +65,6 @@ services:
             - vaultwarden
         environment:
             TZ: 'Europe/Moscow'
-            LETSENCRYPT: 'true'
-            LE_EMAIL: 'name@example.com'
-            LE_FQDN: 'www.example.com'
 
     watchtower:
         image: containrrr/watchtower
